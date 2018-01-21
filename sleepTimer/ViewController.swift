@@ -29,13 +29,11 @@ extension UIApplication {
 class ViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - IBOutlets
-    
     @IBOutlet weak var startButton: UIButton!
     @IBOutlet weak var pauseButton: UIButton!
     @IBOutlet weak var resetButton: UIButton!
     @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var editBox: UITextField!
-    @IBOutlet weak var doneButton: UIBarButtonItem!
     
     let button = UIButton(type: UIButtonType.custom)
     let limitLength = 10
@@ -46,46 +44,22 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var isTimerRunning = false
     var resumeTapped = false
 
-    
 
     // MARK: - IBActions
-    
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = editBox.text else { return true }
-        let newLength = text.count + string.count - range.length
-        return newLength <= limitLength
-    }
-    
-    func stringToInt() {
-        let totalSeconds:Int? = Int(editBox.text!)
-        
-        guard let text = editBox.text, !text.isEmpty else {
-            seconds = 0
-            return
-        }
-        seconds = totalSeconds! * 60
-    }
-    
     @IBAction func startButtonTapped(_ sender: UIButton) {
         stringToInt()
         if seconds == 0 {
             timerLabel.text = "Please enter a number greater than 0"
         } else if isTimerRunning == false {
-//            if seconds > 86400 {
-//                seconds = 86400
-//            }
+            if seconds > 86400 {
+                seconds = 86400
+            }
             
             runTimer()
             self.startButton.isEnabled = false
             editBox.resignFirstResponder()
             editBox.text = ""
         }
-    }
-    
-    @objc func runTimer() {
-        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
-        isTimerRunning = true
-        pauseButton.isEnabled = true
     }
     
     @IBAction func pauseButtonTapped(_ sender: UIButton) {
@@ -111,6 +85,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
         isTimerRunning = false
         pauseButton.isEnabled = false
         startButton.isEnabled = true
+        
+        self.pauseButton.setTitle("Pause", for: .normal)
+        self.resumeTapped = false
+    }
+    
+    @objc func runTimer() {
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
+        isTimerRunning = true
+        pauseButton.isEnabled = true
     }
     
     @objc func updateTimer() {
@@ -140,7 +123,22 @@ class ViewController: UIViewController, UITextFieldDelegate {
         let minutes = Int(time) / 60 % 60
         let seconds = Int(time) % 60
         return String(format: "%02i:%02i:%02i", hours, minutes, seconds)
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = editBox.text else { return true }
+        let newLength = text.count + string.count - range.length
+        return newLength <= limitLength
+    }
+    
+    func stringToInt() {
+        let totalSeconds:Int? = Int(editBox.text!)
         
+        guard let text = editBox.text, !text.isEmpty else {
+            seconds = 0
+            return
+        }
+        seconds = totalSeconds! * 60
     }
     
     // Return button
@@ -148,8 +146,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         view.endEditing(true)
     }
     
-    func addDoneButtonOnKeyboard()
-    {
+    func addDoneButtonOnKeyboard() {
         let doneToolbar: UIToolbar = UIToolbar(frame: CGRect(0, 0, 320, 50))
         doneToolbar.barStyle = UIBarStyle.default
         
@@ -167,13 +164,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.dismissKeyboard))
         view.addGestureRecognizer(tap)
-        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         pauseButton.isEnabled = false
         self.view.backgroundColor = UIColor.black
+        timerLabel.textColor = .white
         
         // Return button
         self.addDoneButtonOnKeyboard()
@@ -185,14 +182,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         pauseButton.setTitleColor(UIColor(red:0.12, green:0.30, blue:0.57, alpha:1.0), for: .disabled)
         
         resetButton.setTitleColor(UIColor(red:0.20, green:0.47, blue:0.88, alpha:1.0), for: .disabled)
-        
-            timerLabel.textColor = .white
-    
     }
-
-//    override func didReceiveMemoryWarning() {
-//        super.didReceiveMemoryWarning()
-//        // Dispose of any resources that can be recreated.
-//    }
 }
 
